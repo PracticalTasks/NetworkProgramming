@@ -15,9 +15,11 @@ class Network
 public:
 	Network();
 	~Network();
-	int print_ips(const std::string& host_name);
+	void print_ips(const std::string& host_name);
+	void print_hostname(const std::string& ip_addr);
 
 private:
-	int print_ips_with_getaddrinfo(const std::string& host_name);
-	int print_ips_with_gethostbyname(const std::string& host_name);
+	addrinfo* getAddrInfo(const std::string& host_name);
+	char* getNameInfo(const std::string& ip_addr);
+
 };

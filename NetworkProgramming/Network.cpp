@@ -4,28 +4,79 @@
 
 Network::Network()
 {
-
 }
 
 Network::~Network()
 {
 }
 
-int Network::print_ips(const std::string& host_name)
+//Метод для вывода на экран ip адреса по имени хоста
+void Network::print_ips(const std::string& host_name)
 {
-    //Используем современную функцию
-    return print_ips_with_getaddrinfo(host_name);
+    addrinfo* servinfo = getAddrInfo(host_name);
+
+    if (servinfo)
+    {
+        std::cout
+            << "Getting name for \"" << host_name << "\"...\n"
+            << "Using getaddrinfo() function." << std::endl;
+
+        for (auto const* s = servinfo; s != nullptr; s = s->ai_next)
+        {
+            std::cout << "Canonical name: ";
+            if (s->ai_canonname)
+                std::cout << s->ai_canonname;
+            std::cout << "\n";
+
+            assert(s->ai_family == s->ai_addr->sa_family);
+            std::cout << "Address type: ";
+
+            if (AF_INET == s->ai_family)
+            {
+                char ip[INET_ADDRSTRLEN];
+                std::cout << "AF_INET\n";
+                sockaddr_in const* const sin = reinterpret_cast<const sockaddr_in* const>(s->ai_addr);
+                std::cout << "Address length: " << sizeof(sin->sin_addr) << "\n";
+                std::cout << "IP Address: " << inet_ntop(AF_INET, &(sin->sin_addr), ip, INET_ADDRSTRLEN) << "\n";
+            }
+            else if (AF_INET6 == s->ai_family)
+            {
+                char ip6[INET6_ADDRSTRLEN];
+
+                std::cout << "AF_INET6\n";
+                const sockaddr_in6* const sin = reinterpret_cast<const sockaddr_in6* const>(s->ai_addr);
+                std::cout << "Address length: " << sizeof(sin->sin6_addr) << "\n";
+                std::cout << "IP Address: " << inet_ntop(AF_INET6, &(sin->sin6_addr), ip6, INET6_ADDRSTRLEN) << "\n";
+            }
+            else
+            {
+                std::cout << s->ai_family << "\n";
+            }
+            std::cout << std::endl;
+        }
+        std::cout << std::endl;
+    }
+
+    freeaddrinfo(servinfo);
 }
 
-//Функция получения имени хоста по ip
-int Network::print_ips_with_getaddrinfo(const std::string& host_name)
+void Network::print_hostname(const std::string& ip_addr)
+{
+    std::cout
+        << "Getting name for \"" << ip_addr << "\"...\n"
+        << "Using getnameinfo() function." << std::endl;
+
+    std::cout<<"Host name: " << getNameInfo(ip_addr) << std::endl;
+}
+
+//Метод для трансяции имени хоста в адресс
+//Возвращает указатель на связанный список структур addrinfo содержащую информацию о хосте
+addrinfo* Network::getAddrInfo(const std::string& host_name)
 {
     // Need for Windows initialization.
     socket_wrapper::SocketWrapper sock_wrap;
 
-    std::cout
-        << "Getting name for \"" << host_name << "\"...\n"
-        << "Using getaddrinfo() function." << std::endl;
+    addrinfo* servinfo = nullptr;
 
     addrinfo hints =
     {
@@ -38,107 +89,35 @@ int Network::print_ips_with_getaddrinfo(const std::string& host_name)
         .ai_protocol = 0
     };
 
-    // Results.
-    addrinfo* servinfo = nullptr;
     int status = 0;
 
     if ((status = getaddrinfo(host_name.c_str(), nullptr, &hints, &servinfo)) != 0)
     {
         std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
-        return EXIT_FAILURE;
+        return nullptr;
     }
 
-    for (auto const* s = servinfo; s != nullptr; s = s->ai_next)
-    {
-        std::cout << "Canonical name: ";
-        if (s->ai_canonname)
-            std::cout << s->ai_canonname;
-        std::cout << "\n";
-
-        assert(s->ai_family == s->ai_addr->sa_family);
-        std::cout << "Address type: ";
-
-        if (AF_INET == s->ai_family)
-        {
-            char ip[INET_ADDRSTRLEN];
-            std::cout << "AF_INET\n";
-            sockaddr_in const* const sin = reinterpret_cast<const sockaddr_in* const>(s->ai_addr);
-            std::cout << "Address length: " << sizeof(sin->sin_addr) << "\n";
-            std::cout << "IP Address: " << inet_ntop(AF_INET, &(sin->sin_addr), ip, INET_ADDRSTRLEN) << "\n";
-        }
-        else if (AF_INET6 == s->ai_family)
-        {
-            char ip6[INET6_ADDRSTRLEN];
-
-            std::cout << "AF_INET6\n";
-            const sockaddr_in6* const sin = reinterpret_cast<const sockaddr_in6* const>(s->ai_addr);
-            std::cout << "Address length: " << sizeof(sin->sin6_addr) << "\n";
-            std::cout << "IP Address: " << inet_ntop(AF_INET6, &(sin->sin6_addr), ip6, INET6_ADDRSTRLEN) << "\n";
-        }
-        else
-        {
-            std::cout << s->ai_family << "\n";
-        }
-        std::cout << std::endl;
-    }
-    std::cout << std::endl;
-
-    freeaddrinfo(servinfo);
-
-    return EXIT_SUCCESS;
+    return servinfo;
 }
 
-//Функция получения имени хоста по ip(Используются устаревшие функции)
-int Network::print_ips_with_gethostbyname(const std::string& host_name)
+char* Network::getNameInfo(const std::string& ip_addr)
 {
-    std::cout
-        << "Getting name for \"" << host_name << "\"...\n"
-        << "Using gethostbyname() function." << std::endl;
-
+    // Need for Windows initialization.
     socket_wrapper::SocketWrapper sock_wrap;
-    const hostent* remote_host{ gethostbyname(host_name.c_str()) };
+    sockaddr_in pSockaddr;
 
-    if (nullptr == remote_host)
+    pSockaddr.sin_family = AF_INET;
+    pSockaddr.sin_addr.S_un.S_addr = inet_addr(ip_addr.c_str());
+
+    char hostname[NI_MAXHOST]{};
+
+    //std::string hostName;
+    int status = 0;
+    if (status = getnameinfo((sockaddr*)&pSockaddr, sizeof(sockaddr), hostname, NI_MAXHOST, NULL, NULL, NULL) != 0)
     {
-        if (sock_wrap.get_last_error_code())
-        {
-            std::cerr << sock_wrap.get_last_error_string() << std::endl;
-        }
-
-        return EXIT_FAILURE;
+        std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
+        return nullptr;
     }
 
-    std::cout << "Official name: " << remote_host->h_name << "\n";
-
-    for (const char* const* p_alias = const_cast<const char* const*>(remote_host->h_aliases); *p_alias; ++p_alias)
-    {
-        std::cout << "# Alternate name: \"" << *p_alias << "\"\n";
-    }
-
-    std::cout << "Address type: ";
-    if (AF_INET == remote_host->h_addrtype)
-    {
-        std::cout << "AF_INET\n";
-        std::cout << "\nAddress length: " << remote_host->h_length << "\n";
-
-        in_addr addr = { 0 };
-
-        for (int i = 0; remote_host->h_addr_list[i]; ++i)
-        {
-            addr.s_addr = *reinterpret_cast<const u_long* const>(remote_host->h_addr_list[i]);
-            std::cout << "IP Address: " << inet_ntoa(addr) << "\n";
-        }
-    }
-    else if (AF_INET6 == remote_host->h_addrtype)
-    {
-        std::cout << "AF_INET6\n";
-    }
-    else
-    {
-        std::cout << remote_host->h_addrtype << "\n";
-    }
-
-    std::cout << std::endl;
-
-    return EXIT_SUCCESS;
+    return hostname;
 }
