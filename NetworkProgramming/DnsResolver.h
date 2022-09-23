@@ -6,11 +6,11 @@
 #include <socket_wrapper/socket_headers.h>
 #include <socket_wrapper/socket_wrapper.h>
 
-class Network
+class DnsResolver
 {
 public:
-	Network();
-	~Network();
+	DnsResolver();
+	~DnsResolver();
 	void print_ips(const std::string& host_name);
 	void print_hostname(const std::string& ip_addr);
 

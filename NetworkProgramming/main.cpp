@@ -1,4 +1,4 @@
-#include "Network.h"
+#include "DnsResolver.h"
 
 int main(int argc, const char* argv[])
 {
@@ -9,12 +9,12 @@ int main(int argc, const char* argv[])
 	}
 	 
 	const std::string arg = { argv[1] };
-	Network net;
+	DnsResolver resolver;
 	//Сам определяет прямой или обратный DNS resolve
 	if(arg[0] > '0' && arg[0] <= '9')
-		net.print_hostname(arg);
+		resolver.print_hostname(arg);
 	else
-		net.print_ips(arg);
+		resolver.print_ips(arg);
 	
 
 }

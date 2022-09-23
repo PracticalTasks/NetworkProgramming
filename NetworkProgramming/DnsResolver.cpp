@@ -1,17 +1,17 @@
-#include "Network.h"
+#include "DnsResolver.h"
 
 #pragma warning(disable : 4996)
 
-Network::Network()
+DnsResolver::DnsResolver()
 {
 }
 
-Network::~Network()
+DnsResolver::~DnsResolver()
 {
 }
 
 //Метод для печати на экран ip адреса по имени хоста
-void Network::print_ips(const std::string& host_name)
+void DnsResolver::print_ips(const std::string& host_name)
 {
     addrinfo* servinfo = getAddrInfo(host_name);
 
@@ -61,7 +61,7 @@ void Network::print_ips(const std::string& host_name)
 }
 
 //Вывод на экран имени хоста по ip адресу
-void Network::print_hostname(const std::string& ip_addr)
+void DnsResolver::print_hostname(const std::string& ip_addr)
 {
     std::cout
         << "Getting name for \"" << ip_addr << "\"...\n"
@@ -72,7 +72,7 @@ void Network::print_hostname(const std::string& ip_addr)
 
 //Метод для трансяции имени хоста в адресс
 //Возвращает указатель на связанный список структур addrinfo содержащую информацию о хосте
-addrinfo* Network::getAddrInfo(const std::string& host_name)
+addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
 {
     // Need for Windows initialization.
     socket_wrapper::SocketWrapper sock_wrap;
@@ -103,14 +103,14 @@ addrinfo* Network::getAddrInfo(const std::string& host_name)
 
 //Метод для получения от сервера имени хоста по ip адресу
 //Возвращает строку с именем хоста
-char* Network::getNameInfo(const std::string& ip_addr)
+char* DnsResolver::getNameInfo(const std::string& ip_addr)
 {
     // Need for Windows initialization.
     socket_wrapper::SocketWrapper sock_wrap;
     sockaddr_in pSockaddr;
 
     pSockaddr.sin_family = AF_INET;
-    pSockaddr.sin_addr.S_un.S_addr = inet_addr(ip_addr.c_str());
+    pSockaddr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
 
     char hostname[NI_MAXHOST]{};
 
