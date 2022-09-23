@@ -10,7 +10,7 @@ Network::~Network()
 {
 }
 
-//Метод для вывода на экран ip адреса по имени хоста
+//Метод для печати на экран ip адреса по имени хоста
 void Network::print_ips(const std::string& host_name)
 {
     addrinfo* servinfo = getAddrInfo(host_name);
@@ -60,6 +60,7 @@ void Network::print_ips(const std::string& host_name)
     freeaddrinfo(servinfo);
 }
 
+//Вывод на экран имени хоста по ip адресу
 void Network::print_hostname(const std::string& ip_addr)
 {
     std::cout
@@ -100,6 +101,8 @@ addrinfo* Network::getAddrInfo(const std::string& host_name)
     return servinfo;
 }
 
+//Метод для получения от сервера имени хоста по ip адресу
+//Возвращает строку с именем хоста
 char* Network::getNameInfo(const std::string& ip_addr)
 {
     // Need for Windows initialization.
