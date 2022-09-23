@@ -10,7 +10,7 @@ int main(int argc, const char* argv[])
 	 
 	const std::string arg = { argv[1] };
 	DnsResolver resolver;
-	//Ñàì îïðåäåëÿåò ïðÿìîé èëè îáðàòíûé DNS resolve
+	//Ð¡Ð°Ð¼ Ð¾Ð¿Ñ€ÐµÐ´ÐµÐ»ÑÐµÑ‚ Ð¿Ñ€ÑÐ¼Ð¾Ð¹ Ð¸Ð»Ð¸ Ð¾Ð±Ñ€Ð°Ñ‚Ð½Ñ‹Ð¹ DNS resolve
 	if(arg[0] > '0' && arg[0] <= '9')
 		resolver.print_hostname(arg);
 	else

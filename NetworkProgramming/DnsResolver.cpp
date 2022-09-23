@@ -10,7 +10,7 @@ DnsResolver::~DnsResolver()
 {
 }
 
-//Метод для печати на экран ip адреса по имени хоста
+//РњРµС‚РѕРґ РґР»СЏ РїРµС‡Р°С‚Рё РЅР° СЌРєСЂР°РЅ ip Р°РґСЂРµСЃР° РїРѕ РёРјРµРЅРё С…РѕСЃС‚Р°
 void DnsResolver::print_ips(const std::string& host_name)
 {
     addrinfo* servinfo = getAddrInfo(host_name);
@@ -60,7 +60,7 @@ void DnsResolver::print_ips(const std::string& host_name)
     freeaddrinfo(servinfo);
 }
 
-//Вывод на экран имени хоста по ip адресу
+//Р’С‹РІРѕРґ РЅР° СЌРєСЂР°РЅ РёРјРµРЅРё С…РѕСЃС‚Р° РїРѕ ip Р°РґСЂРµСЃСѓ
 void DnsResolver::print_hostname(const std::string& ip_addr)
 {
     std::cout
@@ -70,8 +70,8 @@ void DnsResolver::print_hostname(const std::string& ip_addr)
     std::cout<<"Host name: " << getNameInfo(ip_addr) << std::endl;
 }
 
-//Метод для трансяции имени хоста в адресс
-//Возвращает указатель на связанный список структур addrinfo содержащую информацию о хосте
+//РњРµС‚РѕРґ РґР»СЏ С‚СЂР°РЅСЃСЏС†РёРё РёРјРµРЅРё С…РѕСЃС‚Р° РІ Р°РґСЂРµСЃСЃ
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ СѓРєР°Р·Р°С‚РµР»СЊ РЅР° СЃРІСЏР·Р°РЅРЅС‹Р№ СЃРїРёСЃРѕРє СЃС‚СЂСѓРєС‚СѓСЂ addrinfo СЃРѕРґРµСЂР¶Р°С‰СѓСЋ РёРЅС„РѕСЂРјР°С†РёСЋ Рѕ С…РѕСЃС‚Рµ
 addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
 {
     // Need for Windows initialization.
@@ -82,7 +82,7 @@ addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
     addrinfo hints =
     {
         .ai_flags = AI_CANONNAME,
-        // Неважно, IPv4 или IPv6.
+        // РќРµРІР°Р¶РЅРѕ, IPv4 РёР»Рё IPv6.
         .ai_family = AF_UNSPEC,
         // TCP stream-sockets.
         .ai_socktype = SOCK_STREAM,
@@ -101,8 +101,8 @@ addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
     return servinfo;
 }
 
-//Метод для получения от сервера имени хоста по ip адресу
-//Возвращает строку с именем хоста
+//РњРµС‚РѕРґ РґР»СЏ РїРѕР»СѓС‡РµРЅРёСЏ РѕС‚ СЃРµСЂРІРµСЂР° РёРјРµРЅРё С…РѕСЃС‚Р° РїРѕ ip Р°РґСЂРµСЃСѓ
+//Р’РѕР·РІСЂР°С‰Р°РµС‚ СЃС‚СЂРѕРєСѓ СЃ РёРјРµРЅРµРј С…РѕСЃС‚Р°
 char* DnsResolver::getNameInfo(const std::string& ip_addr)
 {
     // Need for Windows initialization.
