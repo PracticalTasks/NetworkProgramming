@@ -45,7 +45,7 @@ int EchoServer::listenTo(const uint16_t READ_PORT)
         return EXIT_FAILURE;
     }
 
-    char buffer[256];
+    char buffer[256]{};
 
     // socket address used to store client address
     struct sockaddr_in client_address = { 0 };
@@ -76,13 +76,14 @@ int EchoServer::listenTo(const uint16_t READ_PORT)
                 << buffer
                 << "\n'''"
                 << std::endl;
-            //if ("exit" == command_string) run = false;
-            //send(sock, &buf, readden, 0);
-
-/*            std::string command_string = {buffer, 0, len};
-            rtrim(command_string);
-            std::cout << command_string << std::endl;
-*/
+            std::string tmpStr = buffer;
+            std::string cmdStr = rtrim(tmpStr);
+            if (cmdStr == "exit")
+            {
+                std::cout << "Stoped echo server ...\n";
+                break;
+            }
+                
             sendto(echoSock, buffer, recv_len, 0, reinterpret_cast<const sockaddr*>(&client_address),
                 client_address_len);
         }
