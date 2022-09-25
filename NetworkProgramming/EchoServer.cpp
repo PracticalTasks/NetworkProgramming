@@ -3,7 +3,7 @@
 
 EchoServer::EchoServer(const uint16_t READ_PORT)
 {
-    listenTo(READ_PORT);
+    read(READ_PORT);
 }
 
 EchoServer::~EchoServer()
@@ -17,7 +17,7 @@ inline std::string& EchoServer::rtrim(std::string& s)
     return s;
 }
 
-int EchoServer::listenTo(const uint16_t READ_PORT)
+int EchoServer::read(const uint16_t READ_PORT)
 {
     socket_wrapper::SocketWrapper sock_wrap;
     socket_wrapper::Socket echoSock = { AF_INET, SOCK_DGRAM, IPPROTO_UDP };;

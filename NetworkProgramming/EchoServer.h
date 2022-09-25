@@ -20,6 +20,6 @@ public:
 
 private:
 	inline std::string& rtrim(std::string& s);
-	int listenTo(const uint16_t READ_PORT);
+	int read(const uint16_t READ_PORT);
 
 };
