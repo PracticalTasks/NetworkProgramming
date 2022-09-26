@@ -10,7 +10,7 @@ EchoServer::~EchoServer()
 {
 }
 
-//Метод сравнения char строки со string
+//НҐуЇў т±Ўўо¦­йЅ char ті±®л¦ т¬џіtring
 inline bool EchoServer::cmpCharToStr(const char* buf, const std::string& cmd, const int lenBuf)
 {
     if (cmd.size() != lenBuf)
