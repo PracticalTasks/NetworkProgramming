@@ -8,6 +8,6 @@ int main(int argc, char const *argv[])
     return EXIT_FAILURE;
 }
 
-    const uint16_t READ_PORT { std::stoi(argv[1]) };
+    const int READ_PORT { std::stoi(argv[1]) };
     EchoServer echo(READ_PORT);
 }
