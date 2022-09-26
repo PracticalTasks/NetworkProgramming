@@ -2,8 +2,13 @@
 
 #pragma warning(disable : 4996)
 
-DnsResolver::DnsResolver()
+DnsResolver::DnsResolver(const std::string& arg)
 {
+    //Сам определяет прямой или обратный DNS resolve
+    if (arg[0] > '0' && arg[0] <= '9')
+        printHostName(arg);
+    else
+        printIps(arg);
 }
 
 DnsResolver::~DnsResolver()
@@ -11,7 +16,7 @@ DnsResolver::~DnsResolver()
 }
 
 //Метод для печати на экран ip адреса по имени хоста
-void DnsResolver::print_ips(const std::string& host_name)
+void DnsResolver::printIps(const std::string& host_name)
 {
     addrinfo* servinfo = getAddrInfo(host_name);
 
@@ -61,7 +66,7 @@ void DnsResolver::print_ips(const std::string& host_name)
 }
 
 //Вывод на экран имени хоста по ip адресу
-void DnsResolver::print_hostname(const std::string& ip_addr)
+void DnsResolver::printHostName(const std::string& ip_addr)
 {
     std::cout
         << "Getting name for \"" << ip_addr << "\"...\n"
@@ -75,7 +80,7 @@ void DnsResolver::print_hostname(const std::string& ip_addr)
 addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
 {
     // Need for Windows initialization.
-    socket_wrapper::SocketWrapper sock_wrap;
+    socket_wrapper::SocketWrapper sockWrap;
 
     addrinfo* servinfo = nullptr;
 
@@ -90,7 +95,7 @@ addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
         .ai_protocol = 0
     };
 
-    int status = 0;
+    int status{};
 
     if ((status = getaddrinfo(host_name.c_str(), nullptr, &hints, &servinfo)) != 0)
     {
@@ -106,21 +111,21 @@ addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
 char* DnsResolver::getNameInfo(const std::string& ip_addr)
 {
     // Need for Windows initialization.
-    socket_wrapper::SocketWrapper sock_wrap;
+    socket_wrapper::SocketWrapper sockWrap;
     sockaddr_in pSockaddr;
 
     pSockaddr.sin_family = AF_INET;
     pSockaddr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
 
-    char hostname[NI_MAXHOST]{};
+    char hostName[NI_MAXHOST]{};
 
     //std::string hostName;
-    int status = 0;
-    if (status = getnameinfo((sockaddr*)&pSockaddr, sizeof(sockaddr), hostname, NI_MAXHOST, NULL, NULL, NULL) != 0)
+    int status{};
+    if (status = getnameinfo((sockaddr*)&pSockaddr, sizeof(sockaddr), hostName, NI_MAXHOST, NULL, NULL, NULL) != 0)
     {
         std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
         return nullptr;
     }
 
-    return hostname;
+    return hostName;
 }
