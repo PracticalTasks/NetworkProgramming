@@ -11,7 +11,6 @@
 #include <socket_wrapper/socket_wrapper.h>
 #include <socket_wrapper/socket_class.h>
 
-
 class EchoServer
 {
 public:
@@ -19,7 +18,10 @@ public:
 	~EchoServer();
 
 private:
-	inline std::string& rtrim(std::string& s);
+	inline bool cmpCharToStr(const char* buf, const std::string& cmd , const int lenBuf);
 	int read(const uint16_t READ_PORT);
+
+private:
+	const std::string CMD_EXT = "exit";
 
 };
