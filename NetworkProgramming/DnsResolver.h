@@ -12,10 +12,10 @@ class DnsResolver
 public:
 	DnsResolver(const std::string& arg);
 	~DnsResolver();
-	void printIps(const std::string& host_name);
-	void printHostName(const std::string& ip_addr);
 
 private:
+	void printIps(const std::string& host_name);
+	void printHostName(const std::string& ip_addr);
 	addrinfo* getAddrInfo(const std::string& host_name);
 	char* getNameInfo(const std::string& ip_addr);
 
