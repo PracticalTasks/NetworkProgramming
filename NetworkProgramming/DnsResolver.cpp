@@ -6,9 +6,9 @@ DnsResolver::DnsResolver(const std::string& arg)
 {
     //Сам определяет прямой или обратный DNS resolve
     if (arg[0] > '0' && arg[0] <= '9')
-        printHostName(arg);
+        print_hostname(arg);
     else
-        printIps(arg);
+        print_ips(arg);
 }
 
 DnsResolver::~DnsResolver()
@@ -16,9 +16,9 @@ DnsResolver::~DnsResolver()
 }
 
 //Метод для печати на экран ip адреса по имени хоста
-void DnsResolver::printIps(const std::string& host_name)
+void DnsResolver::print_ips(const std::string& host_name)
 {
-    addrinfo* servinfo = getAddrInfo(host_name);
+    addrinfo* servinfo = get_addrinfo(host_name);
 
     if (servinfo)
     {
@@ -66,21 +66,21 @@ void DnsResolver::printIps(const std::string& host_name)
 }
 
 //Вывод на экран имени хоста по ip адресу
-void DnsResolver::printHostName(const std::string& ip_addr)
+void DnsResolver::print_hostname(const std::string& ip_addr)
 {
     std::cout
         << "Getting name for \"" << ip_addr << "\"...\n"
         << "Using getnameinfo() function." << std::endl;
 
-    std::cout<<"Host name: " << getNameInfo(ip_addr) << std::endl;
+    std::cout<<"Host name: " << get_nameinfo(ip_addr) << std::endl;
 }
 
 //Метод для трансяции имени хоста в адресс
 //Возвращает указатель на связанный список структур addrinfo содержащую информацию о хосте
-addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
+addrinfo* DnsResolver::get_addrinfo(const std::string& host_name)
 {
     // Need for Windows initialization.
-    socket_wrapper::SocketWrapper sockWrap;
+    socket_wrapper::SocketWrapper sock_wrap;
 
     addrinfo* servinfo = nullptr;
 
@@ -108,24 +108,24 @@ addrinfo* DnsResolver::getAddrInfo(const std::string& host_name)
 
 //Метод для получения от сервера имени хоста по ip адресу
 //Возвращает строку с именем хоста
-char* DnsResolver::getNameInfo(const std::string& ip_addr)
+char* DnsResolver::get_nameinfo(const std::string& ip_addr)
 {
     // Need for Windows initialization.
-    socket_wrapper::SocketWrapper sockWrap;
+    socket_wrapper::SocketWrapper sock_wrap;
     sockaddr_in pSockaddr;
 
     pSockaddr.sin_family = AF_INET;
     pSockaddr.sin_addr.s_addr = inet_addr(ip_addr.c_str());
 
-    char hostName[NI_MAXHOST]{};
+    char host_name[NI_MAXHOST]{};
 
     //std::string hostName;
     int status{};
-    if (status = getnameinfo((sockaddr*)&pSockaddr, sizeof(sockaddr), hostName, NI_MAXHOST, NULL, NULL, NULL) != 0)
+    if (status = getnameinfo((sockaddr*)&pSockaddr, sizeof(sockaddr), host_name, NI_MAXHOST, NULL, NULL, NULL) != 0)
     {
         std::cerr << "getaddrinfo error: " << gai_strerror(status) << std::endl;
         return nullptr;
     }
 
-    return hostName;
+    return host_name;
 }
