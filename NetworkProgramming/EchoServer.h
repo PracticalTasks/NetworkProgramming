@@ -18,7 +18,7 @@ public:
 	~EchoServer();
 
 private:
-	inline bool cmpCharToStr(const char* buf, const std::string& cmd , const int lenBuf);
+	inline bool cmp_chartostr(const char* buf, const std::string& cmd , const int lenBuf);
 	int read(const uint16_t READ_PORT);
 
 private:

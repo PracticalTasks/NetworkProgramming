@@ -11,7 +11,7 @@ EchoServer::~EchoServer()
 }
 
 //Метод для сравнения символьной строки с string
-inline bool EchoServer::cmpCharToStr(const char* buf, const std::string& cmd, const int lenBuf)
+inline bool EchoServer::cmp_chartostr(const char* buf, const std::string& cmd, const int lenBuf)
 {
     if (cmd.size() != lenBuf)
         return false;
@@ -27,14 +27,14 @@ inline bool EchoServer::cmpCharToStr(const char* buf, const std::string& cmd, co
 
 int EchoServer::read(const uint16_t READ_PORT)
 {
-    socket_wrapper::SocketWrapper sockWrap;
-    socket_wrapper::Socket echoSock = { AF_INET, SOCK_DGRAM, IPPROTO_UDP };;
+    socket_wrapper::SocketWrapper sock_wrap;
+    socket_wrapper::Socket echo_sock = { AF_INET, SOCK_DGRAM, IPPROTO_UDP };;
 
     std::cout << "Starting echo server on the port " << READ_PORT << "...\n";
 
-    if (!echoSock)
+    if (!echo_sock)
     {
-        std::cerr << sockWrap.get_last_error_string() << std::endl;
+        std::cerr << sock_wrap.get_last_error_string() << std::endl;
         return EXIT_FAILURE;
     }
 
@@ -46,9 +46,9 @@ int EchoServer::read(const uint16_t READ_PORT)
 
     addr.sin_addr.s_addr = INADDR_ANY;
 
-    if (bind(echoSock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0)
+    if (bind(echo_sock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0)
     {
-        std::cerr << sockWrap.get_last_error_string() << std::endl;
+        std::cerr << sock_wrap.get_last_error_string() << std::endl;
         // Socket will be closed in the Socket destructor.
         return EXIT_FAILURE;
     }
@@ -57,42 +57,42 @@ int EchoServer::read(const uint16_t READ_PORT)
 
     // socket address used to store client address
     struct sockaddr_in clientAddress = {};
-    socklen_t clientAddressLen = sizeof(sockaddr_in);
-    ssize_t recvLen {};
+    socklen_t client_addrlen = sizeof(sockaddr_in);
+    ssize_t recv_len {};
 
     std::cout << "Running echo server...\n" << std::endl;
-    char clientAddressBuf[INET_ADDRSTRLEN];
+    char client_addrbuf[INET_ADDRSTRLEN];
 
     while (true)
     {
         // Read content into buffer from an incoming client.
-        recvLen = recvfrom(echoSock, buffer, sizeof(buffer) - 1, 0,
+        recv_len = recvfrom(echo_sock, buffer, sizeof(buffer) - 1, 0,
             reinterpret_cast<sockaddr*>(&clientAddress),
-            &clientAddressLen);
+            &client_addrlen);
 
-        if (recvLen > 0)
+        if (recv_len > 0)
         {
-            buffer[recvLen] = '\0';
+            buffer[recv_len] = '\0';
             std::cout
                 << "Client with address "
-                << inet_ntop(AF_INET, &clientAddress.sin_addr, clientAddressBuf, sizeof(clientAddressBuf) / sizeof(clientAddressBuf[0]))
+                << inet_ntop(AF_INET, &clientAddress.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
                 << ":" << ntohs(clientAddress.sin_port)
                 << " sent datagram "
                 << "[length = "
-                << recvLen
+                << recv_len
                 << "]:\n'''\n"
                 << buffer
                 << "\n'''"
                 << std::endl;
 
-            if (cmpCharToStr(buffer, CMD_EXT, recvLen))
+            if (cmp_chartostr(buffer, CMD_EXT, recv_len))
             {
                 std::cout << "Stoped echo server ...\n";
                 break;
             }
                 
-            sendto(echoSock, buffer, recvLen, 0, reinterpret_cast<const sockaddr*>(&clientAddress),
-                clientAddressLen);
+            sendto(echo_sock, buffer, recv_len, 0, reinterpret_cast<const sockaddr*>(&clientAddress),
+                client_addrlen);
         }
 
         std::cout << std::endl;
