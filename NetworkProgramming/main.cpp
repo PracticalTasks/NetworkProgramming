@@ -9,5 +9,5 @@ int main(int argc, char const *argv[])
 }
 
     const int READ_PORT { std::stoi(argv[1]) };
-    EchoServer echo(READ_PORT);
+    TcpEchoServer echo(READ_PORT);
 }

@@ -1,17 +1,17 @@
 #include "TcpEchoServer.h"
 
 
-EchoServer::EchoServer(const uint16_t READ_PORT)
+TcpEchoServer::TcpEchoServer(const uint16_t READ_PORT)
 {
     read(READ_PORT);
 }
 
-EchoServer::~EchoServer()
+TcpEchoServer::~TcpEchoServer()
 {
 }
 
 //Метод для сравнения символьной строки с string
-inline bool EchoServer::cmp_chartostr(const char* buf, const std::string& cmd, const int lenBuf)
+inline bool TcpEchoServer::cmp_chartostr(const char* buf, const std::string& cmd, const int lenBuf)
 {
     if (cmd.size() != lenBuf)
         return false;
@@ -25,10 +25,10 @@ inline bool EchoServer::cmp_chartostr(const char* buf, const std::string& cmd, c
     return true;
 }
 
-int EchoServer::read(const uint16_t READ_PORT)
+int TcpEchoServer::read(const uint16_t READ_PORT)
 {
     socket_wrapper::SocketWrapper sock_wrap;
-    socket_wrapper::Socket echo_sock = { AF_INET, SOCK_DGRAM, IPPROTO_UDP };;
+    socket_wrapper::Socket echo_sock = { AF_INET, SOCK_STREAM, NULL };;
 
     std::cout << "Starting echo server on the port " << READ_PORT << "...\n";
 
@@ -40,7 +40,7 @@ int EchoServer::read(const uint16_t READ_PORT)
 
     sockaddr_in addr =
     {
-        .sin_family = PF_INET,
+        .sin_family = AF_INET,
         .sin_port = htons(READ_PORT),
     };
 
@@ -53,21 +53,28 @@ int EchoServer::read(const uint16_t READ_PORT)
         return EXIT_FAILURE;
     }
 
+    //if (listen(echo_sock, SOMAXCONN) != SOCKET_ERROR) {
+    //    std::cout << "Start listenin at port " << ntohs(addr.sin_port) << std::endl;
+    //    //printf("Start listenin at port%u\n", ntohs(addr.sin_port));
+    //}
+
     char buffer[256]{};
 
     // socket address used to store client address
-    struct sockaddr_in clientAddress = {};
+    struct sockaddr_in client_addr = {};
     socklen_t client_addrlen = sizeof(sockaddr_in);
     ssize_t recv_len {};
 
-    std::cout << "Running echo server...\n" << std::endl;
+    if (listen(echo_sock, SOMAXCONN) != SOCKET_ERROR)
+        std::cout << "Running echo tcp server...\n" << std::endl;
+        
     char client_addrbuf[INET_ADDRSTRLEN];
 
     while (true)
     {
         // Read content into buffer from an incoming client.
         recv_len = recvfrom(echo_sock, buffer, sizeof(buffer) - 1, 0,
-            reinterpret_cast<sockaddr*>(&clientAddress),
+            reinterpret_cast<sockaddr*>(&client_addr),
             &client_addrlen);
 
         if (recv_len > 0)
@@ -75,8 +82,8 @@ int EchoServer::read(const uint16_t READ_PORT)
             buffer[recv_len] = '\0';
             std::cout
                 << "Client with address "
-                << inet_ntop(AF_INET, &clientAddress.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
-                << ":" << ntohs(clientAddress.sin_port)
+                << inet_ntop(AF_INET, &client_addr.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
+                << ":" << ntohs(client_addr.sin_port)
                 << " sent datagram "
                 << "[length = "
                 << recv_len
@@ -91,7 +98,7 @@ int EchoServer::read(const uint16_t READ_PORT)
                 break;
             }
                 
-            sendto(echo_sock, buffer, recv_len, 0, reinterpret_cast<const sockaddr*>(&clientAddress),
+            sendto(echo_sock, buffer, recv_len, 0, reinterpret_cast<const sockaddr*>(&client_addr),
                 client_addrlen);
         }
 
@@ -99,4 +106,5 @@ int EchoServer::read(const uint16_t READ_PORT)
     }
 
     return EXIT_SUCCESS;
+https://habr.com/ru/post/327574/
 }

@@ -11,11 +11,11 @@
 #include <socket_wrapper/socket_wrapper.h>
 #include <socket_wrapper/socket_class.h>
 
-class EchoServer
+class TcpEchoServer
 {
 public:
-	EchoServer(const uint16_t READ_PORT);
-	~EchoServer();
+	TcpEchoServer(const uint16_t READ_PORT);
+	~TcpEchoServer();
 
 private:
 	inline bool cmp_chartostr(const char* buf, const std::string& cmd , const int lenBuf);
