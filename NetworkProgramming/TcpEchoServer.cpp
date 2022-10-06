@@ -106,5 +106,5 @@ int TcpEchoServer::read(const uint16_t READ_PORT)
     }
 
     return EXIT_SUCCESS;
-https://habr.com/ru/post/327574/
+
 }
