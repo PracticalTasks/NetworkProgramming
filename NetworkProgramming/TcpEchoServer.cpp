@@ -17,6 +17,7 @@ TcpEchoServer::~TcpEchoServer()
     delete tcp_echosock;
 }
 
+
 bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 {
     addrinfo* servinfo = get_addrinfo(host_name);
