@@ -19,6 +19,8 @@ TcpEchoServer::~TcpEchoServer()
 
 bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 {
+    addrinfo* servinfo = get_addrinfo(host_name);
+
     tcp_echosock = new socket_wrapper::Socket(AF_INET, SOCK_STREAM, NULL);
 
     //std::cout << "Starting echo server on the port " << READ_PORT << "...\n";
