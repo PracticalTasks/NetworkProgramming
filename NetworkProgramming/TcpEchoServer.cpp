@@ -17,6 +17,15 @@ TcpEchoServer::~TcpEchoServer()
     delete tcp_echosock;
 }
 
+//Вывод на экран имени хоста по ip адресу
+void DnsResolver::print_hostname(const std::string& ip_addr)
+{
+    std::cout
+        << "Getting name for \"" << ip_addr << "\"...\n"
+        << "Using getnameinfo() function." << std::endl;
+
+    std::cout << "Host name: " << get_nameinfo(ip_addr) << std::endl;
+}
 
 bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 {
