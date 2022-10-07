@@ -24,7 +24,8 @@ private:
 	bool start_server(const uint16_t READ_PORT);
 	inline bool cmp_chartostr(const char* buf, const std::string& cmd , const int lenBuf);
 	int read();
-	//addrinfo* get_addrinfo(const std::string& host_name);
+	addrinfo* get_addrinfo(const std::string& host_name);
+	void print_ips(const std::string& host_name);
 
 private:
 	socket_wrapper::SocketWrapper sock_wrap;
