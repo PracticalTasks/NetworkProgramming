@@ -105,7 +105,6 @@ int TcpEchoServer::read()
                 return EXIT_FAILURE;
             }
         }
-        break;
     }
     buff.fill(0);
     std::cout << std::endl;
