@@ -81,7 +81,7 @@ bool TcpEchoServer::start_server(const uint16_t READ_PORT)
     //tcp_echosock6 = new socket_wrapper::Socket(servinfo->ai_family, servinfo->ai_socktype, servinfo->ai_protocol);
     tcp_echosock = new socket_wrapper::Socket(AF_INET, SOCK_STREAM, NULL);
 
-    std::cout << "Starting echo server on the port " << READ_PORT << "...\n";
+   // std::cout << "Starting echo server on the port " << READ_PORT << "...\n";
 
 
     if (!*tcp_echosock)
