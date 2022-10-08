@@ -37,6 +37,7 @@ bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 
     addr.sin_addr.s_addr = INADDR_ANY;
 
+
     if (bind(*tcp_echosock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0)
     {
         std::cerr << sock_wrap.get_last_error_string() << std::endl;
