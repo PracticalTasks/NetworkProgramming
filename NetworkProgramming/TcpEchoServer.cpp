@@ -88,6 +88,7 @@ int TcpEchoServer::read()
                 << "\n'''"
                 << std::endl;
 
+
             if (cmp_chartostr(buff.data(), CMD_EXT, packet_size))
             {
                 std::cout << "Echo server has been stopped ...\n";
