@@ -7,6 +7,7 @@
 #include <string>
 #include <thread>
 #include <array>
+#include <fstream>
 
 #include <socket_wrapper/socket_headers.h>
 #include <socket_wrapper/socket_wrapper.h>

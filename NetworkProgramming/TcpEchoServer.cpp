@@ -76,32 +76,66 @@ int TcpEchoServer::read()
 
         if (packet_size > 0)
         {
-            std::cout
-                << "Client with address "
-                << inet_ntop(AF_INET, &addr_c.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
-                << ":" << ntohs(addr_c.sin_port)
-                << " sent datagram "
-                << "[length = "
-                << packet_size
-                << "]:\n'''\n"
-                << buff.data()
-                << "\n'''"
-                << std::endl;
+            std::string filename(buff.data());
+            //Должна быть папка "E:\Netwk" в которой сервер будет искать файл 
+            std::ifstream file("E:\\Netwk\\" + filename, std::ifstream::binary);
 
-
-            if (cmp_chartostr(buff.data(), CMD_EXT, packet_size))
+            if (!file)
             {
-                std::cout << "Echo server has been stopped ...\n";
-                break;
+                std::cout << "Cannot open file " << filename << std::endl;
+                continue;
             }
 
-            packet_size = send(client_sock, buff.data(), packet_size, 0);
+            //Размер буфера 50 Мб
+            int cnt = 0x500000;
+            
+            std::vector<char> buff_bin(cnt);
+            //char* buff_bin = new char[cnt];
+            file.read(buff_bin.data(), cnt);
+           
+            packet_size = 0;
+            for (auto& i : buff_bin)
+            {
+                if (i == '\0')
+                    break;
+                ++packet_size;
+            }
+
+            packet_size = send(client_sock, buff_bin.data(), packet_size, 0);
 
             if (packet_size == SOCKET_ERROR)
             {
                 std::cerr << "Can't send message to Client. Error #" << sock_wrap.get_last_error_string() << std::endl;
                 return EXIT_FAILURE;
             }
+
+            //delete [] buff_bin;
+            //std::cout
+            //    << "Client with address "
+            //    << inet_ntop(AF_INET, &addr_c.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
+            //    << ":" << ntohs(addr_c.sin_port)
+            //    << " sent datagram "
+            //    << "[length = "
+            //    << packet_size
+            //    << "]:\n'''\n"
+            //    << buff.data()
+            //    << "\n'''"
+            //    << std::endl;
+
+
+            //if (cmp_chartostr(buff.data(), CMD_EXT, packet_size))
+            //{
+            //    std::cout << "Echo server has been stopped ...\n";
+            //    break;
+            //}
+
+            //packet_size = send(client_sock, buff.data(), packet_size, 0);
+
+            //if (packet_size == SOCKET_ERROR)
+            //{
+            //    std::cerr << "Can't send message to Client. Error #" << sock_wrap.get_last_error_string() << std::endl;
+            //    return EXIT_FAILURE;
+            //}
         }
 
         buff.fill(0);
