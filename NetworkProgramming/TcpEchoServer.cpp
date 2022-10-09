@@ -45,7 +45,7 @@ bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 
     if (listen(*tcp_echosock, SOMAXCONN) != SOCKET_ERROR)
     {
-        std::cout << "Running echo tcp server on the port " << READ_PORT << "...\n";
+        std::cout << "Running ftp server on the port " << READ_PORT << "...\n";
         return true;
     }
         
