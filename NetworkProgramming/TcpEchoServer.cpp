@@ -1,5 +1,5 @@
 #include "TcpEchoServer.h"
-#pragma warning(disable : 4996)
+
 
 TcpEchoServer::TcpEchoServer(const uint16_t READ_PORT)
 {
@@ -16,7 +16,6 @@ TcpEchoServer::~TcpEchoServer()
 {
     delete tcp_echosock;
 }
-
 
 bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 {
