@@ -1,6 +1,6 @@
-#include "TcpEchoServer.h"
+#include "FtpServer.h"
 
-TcpEchoServer::TcpEchoServer(const uint16_t READ_PORT)
+FtpServer::FtpServer(const uint16_t READ_PORT)
 {
     if (!start_server(READ_PORT))
     {
@@ -11,12 +11,12 @@ TcpEchoServer::TcpEchoServer(const uint16_t READ_PORT)
     read();
 }
 
-TcpEchoServer::~TcpEchoServer()
+FtpServer::~FtpServer()
 {
     delete ftpserv_sock;
 }
 
-bool TcpEchoServer::start_server(const uint16_t READ_PORT)
+bool FtpServer::start_server(const uint16_t READ_PORT)
 {
     ftpserv_sock = new socket_wrapper::Socket(AF_INET, SOCK_STREAM, NULL);
 
@@ -50,7 +50,7 @@ bool TcpEchoServer::start_server(const uint16_t READ_PORT)
     return false;
 }
 
-int TcpEchoServer::read()
+int FtpServer::read()
 {
     char client_addrbuf[INET_ADDRSTRLEN];
 
@@ -129,7 +129,7 @@ int TcpEchoServer::read()
 }
 
 //Метод для сравнения символьной строки с string
-inline bool TcpEchoServer::cmp_chartostr(const char* buf, const std::string& cmd, const int lenBuf)
+inline bool FtpServer::cmp_chartostr(const char* buf, const std::string& cmd, const int lenBuf)
 {
     if (cmd.size() != lenBuf)
         return false;

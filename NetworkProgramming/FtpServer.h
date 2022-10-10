@@ -15,11 +15,11 @@
 
 #define BUFF_SIZE 256
 
-class TcpEchoServer
+class FtpServer
 {
 public:
-	TcpEchoServer(const uint16_t READ_PORT);
-	~TcpEchoServer();
+	FtpServer(const uint16_t READ_PORT);
+	~FtpServer();
 
 private:
 	bool start_server(const uint16_t READ_PORT);
