@@ -25,10 +25,8 @@ private:
 	inline bool cmp_chartostr(const char* buf, const std::string& cmd , const int lenBuf);
 	int read();
 
-
 private:
 	socket_wrapper::SocketWrapper sock_wrap;
 	socket_wrapper::Socket* tcp_echosock = nullptr;
 	const std::string CMD_EXT = "exit";
-
 };
