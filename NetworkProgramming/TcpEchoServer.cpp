@@ -1,6 +1,5 @@
 #include "TcpEchoServer.h"
 
-
 TcpEchoServer::TcpEchoServer(const uint16_t READ_PORT)
 {
     if (!start_server(READ_PORT))
@@ -14,14 +13,14 @@ TcpEchoServer::TcpEchoServer(const uint16_t READ_PORT)
 
 TcpEchoServer::~TcpEchoServer()
 {
-    delete tcp_echosock;
+    delete ftpserv_sock;
 }
 
 bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 {
-    tcp_echosock = new socket_wrapper::Socket(AF_INET, SOCK_STREAM, NULL);
+    ftpserv_sock = new socket_wrapper::Socket(AF_INET, SOCK_STREAM, NULL);
 
-    if (!*tcp_echosock)
+    if (!*ftpserv_sock)
     {
         std::cerr << sock_wrap.get_last_error_string() << std::endl;
         return false;
@@ -35,15 +34,14 @@ bool TcpEchoServer::start_server(const uint16_t READ_PORT)
 
     addr.sin_addr.s_addr = INADDR_ANY;
 
-
-    if (bind(*tcp_echosock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0)
+    if (bind(*ftpserv_sock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0)
     {
         std::cerr << sock_wrap.get_last_error_string() << std::endl;
         // Socket will be closed in the Socket destructor.
         return false;
     }
 
-    if (listen(*tcp_echosock, SOMAXCONN) != SOCKET_ERROR)
+    if (listen(*ftpserv_sock, SOMAXCONN) != SOCKET_ERROR)
     {
         std::cout << "Running ftp server on the port " << READ_PORT << "...\n";
         return true;
@@ -64,7 +62,7 @@ int TcpEchoServer::read()
 
     while (true)
     {
-        socket_wrapper::Socket client_sock = accept(*tcp_echosock, reinterpret_cast<sockaddr*>(&addr_c), &addrlen);
+        socket_wrapper::Socket client_sock = accept(*ftpserv_sock, reinterpret_cast<sockaddr*>(&addr_c), &addrlen);
 
         if (!client_sock)
         {
@@ -76,14 +74,7 @@ int TcpEchoServer::read()
             << "Client with address "
             << inet_ntop(AF_INET, &addr_c.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
             << ":" << ntohs(addr_c.sin_port)
-            //<< " sent datagram "
-            //<< "[length = "
-            //<< packet_size
-            //<< "]:\n'''\n"
-            //<< buff.data()
-            //<< "\n'''"
             << std::endl;
-
 
         while (true)
         {
@@ -123,13 +114,10 @@ int TcpEchoServer::read()
                 break;
             }
                 
-
             buff.fill(0);
             std::cout << std::endl;
         }
-
     }
-
 
     return EXIT_SUCCESS;
 }

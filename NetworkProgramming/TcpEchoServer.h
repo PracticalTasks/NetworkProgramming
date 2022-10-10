@@ -29,7 +29,7 @@ private:
 
 private:
 	socket_wrapper::SocketWrapper sock_wrap;
-	socket_wrapper::Socket* tcp_echosock = nullptr;
+	socket_wrapper::Socket* ftpserv_sock = nullptr;
 	const std::string CMD_EXT = "exit";
 
 };
