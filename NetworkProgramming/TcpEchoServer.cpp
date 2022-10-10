@@ -1,6 +1,5 @@
 #include "TcpEchoServer.h"
 
-
 TcpEchoServer::TcpEchoServer(const uint16_t READ_PORT)
 {
     if (!start_server(READ_PORT))
