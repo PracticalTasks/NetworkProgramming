@@ -82,6 +82,12 @@ int TcpEchoServer::read()
 
             if (packet_size > 0)
             {
+                if (cmp_chartostr(buff.data(), CMD_EXT, packet_size))
+                {
+                    std::cout << "Echo server has been stopped ...\n";
+                    return EXIT_SUCCESS;
+                }
+
                 std::string filename(buff.data());
                 //Должна быть папка "C:\Netwk" в которой сервер будет искать файл 
                 std::ifstream file("C:\\Netwk\\" + filename, std::ifstream::binary);
