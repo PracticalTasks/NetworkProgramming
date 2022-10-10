@@ -72,6 +72,17 @@ int TcpEchoServer::read()
             return EXIT_FAILURE;
         }
 
+        std::cout
+            << "Client with address "
+            << inet_ntop(AF_INET, &addr_c.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
+            << ":" << ntohs(addr_c.sin_port)
+            //<< " sent datagram "
+            //<< "[length = "
+            //<< packet_size
+            //<< "]:\n'''\n"
+            //<< buff.data()
+            //<< "\n'''"
+            << std::endl;
 
 
         while (true)
@@ -106,8 +117,12 @@ int TcpEchoServer::read()
                     return EXIT_FAILURE;
                 }
             }
-            else if (packet_size == -1)
+            else if (packet_size == 0)
+            {
+                std::cout << "disconnect\n";
                 break;
+            }
+                
 
             buff.fill(0);
             std::cout << std::endl;
