@@ -8,7 +8,7 @@ FtpServer::FtpServer(const uint16_t READ_PORT)
         return;
     }
        
-    read();
+    waiting_request();
 }
 
 FtpServer::~FtpServer()
@@ -50,7 +50,7 @@ bool FtpServer::start_server(const uint16_t READ_PORT)
     return false;
 }
 
-int FtpServer::read()
+int FtpServer::waiting_request()
 {
     char client_addrbuf[INET_ADDRSTRLEN];
 
@@ -105,14 +105,20 @@ int FtpServer::read()
 
                 std::vector<char> buff_bin(length);
                 file.read(buff_bin.data(), length);
+                int transmit_cnt = 0;
 
-                packet_size = send(client_sock, buff_bin.data(), length, 0);
-
-                if (packet_size == SOCKET_ERROR)
+                while (transmit_cnt != length)
                 {
-                    std::cerr << "Can't send message to Client. Error #" << sock_wrap.get_last_error_string() << std::endl;
-                    return EXIT_FAILURE;
+                    packet_size = send(client_sock, &(buff_bin.data()[0]) + transmit_cnt, length - transmit_cnt, 0);
+
+                    if (packet_size == SOCKET_ERROR)
+                    {
+                        std::cerr << "Can't send message to Client. Error #" << sock_wrap.get_last_error_string() << std::endl;
+                        return EXIT_FAILURE;
+                    }
+                    transmit_cnt += packet_size;
                 }
+
             }
             else if (packet_size == 0)
             {

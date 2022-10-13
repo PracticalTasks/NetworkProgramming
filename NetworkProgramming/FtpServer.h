@@ -24,7 +24,7 @@ public:
 private:
 	bool start_server(const uint16_t READ_PORT);
 	inline bool cmp_chartostr(const char* buf, const std::string& cmd , const int lenBuf);
-	int read();
+	int waiting_request();
 
 
 private:
