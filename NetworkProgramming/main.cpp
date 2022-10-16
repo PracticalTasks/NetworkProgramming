@@ -1,20 +1,14 @@
+#include "FtpServer.h"
 
-#include "Network.h"
-
-int main(int argc, const char* argv[])
+int main(int argc, char const *argv[])
 {
-	if (argc != 2)
-	{
-		std::cout << "Usage: " << argv[0] << " <hostname>" << std::endl;
-		return EXIT_FAILURE;
-	}
-	 
-	const std::string arg = { argv[1] };
-	Network net;
-	if(arg[0] > '0' && arg[0] <= '9')
-		net.print_hostname(arg);
-	else
-		net.print_ips(arg);
-	
-
+//    if (argc != 2)
+//{
+//    std::cout << "Usage: " << argv[0] << " <port>" << std::endl;
+//    return EXIT_FAILURE;
+//}
+//
+//    const int READ_PORT { std::stoi(argv[1]) };
+    const int READ_PORT{ 5555 };
+    FtpServer ftp(READ_PORT);
 }
