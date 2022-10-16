@@ -90,14 +90,10 @@ int FtpServer::waiting_request()
 
                 std::string filename(network_path + buff.data());
 
-
                 if (!load_file(filename))
                 {
                     std::cout << "Error load file " << filename;
                 }
-
-                //std::vector<char> buff_bin(length);
-
             }
             else if (packet_size == 0)
             {
@@ -123,19 +119,10 @@ void FtpServer::insert_sizefile_tobuff(std::vector<char> &buff, int32_t val)
     lw_val = val & 0xFFFF;
 
     auto it = buff.begin();
-    *it = lw_val & 0xFF;
-    ++it;
-    *it = lw_val >> 8;
-    ++it;
-    *it = hw_val & 0xFF;
-    ++it;
-    *it = hw_val >> 8;
-    ++it;
-    //buff.push_back(lw_val & 0xFF);
-    //buff.push_back(lw_val >> 8);
-
-    //buff.push_back(hw_val & 0xFF);
-    //buff.push_back(hw_val >> 8);
+    it[0] = lw_val & 0xFF;
+    it[1] = lw_val >> 8;
+    it[2] = hw_val & 0xFF;
+    it[3] = hw_val >> 8;
 }
 
 bool FtpServer::load_file(std::string const& file_path)
@@ -158,10 +145,6 @@ bool FtpServer::load_file(std::string const& file_path)
     insert_sizefile_tobuff(buff_bin, length);
     file_stream.read(buff_bin.data() + 4, FILEBUFF_SZ - 4);
     
-    //std::vector<char> send_buf;
-
-    //buff_bin.insert(.begin() + 4, buff_bin.begin(), buff_bin.end());
-
     if (!send_file(buff_bin))
         return false;
 
