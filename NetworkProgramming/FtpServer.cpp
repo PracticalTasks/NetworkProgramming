@@ -144,17 +144,24 @@ bool FtpServer::load_file(std::string const& file_path)
 
     //Заносить в первые четыре байта длину файла в big endian
     insert_sizefile_tobuff(buff_bin, length);
+    //file_stream.read(buff_bin.data(), FILEBUFF_SZ);
     file_stream.read(buff_bin.data() + 4, FILEBUFF_SZ - 4);
-    
+    length -= 0x1000 - 4;
     if (!send_file(buff_bin))
         return false;
-
+    
     while (file_stream)
     {
         file_stream.read(buff_bin.data(), FILEBUFF_SZ);
+
+        if (length <= 0x1000)
+            buff_bin.resize(length);
+
+        length -= 0x1000;
+
         if (!send_file(buff_bin))
             return false;
-        //buff_bin.assign(FILEBUFF_SZ, 0);
+        buff_bin.assign(FILEBUFF_SZ, 0);
     }
    
     return true;
@@ -165,7 +172,7 @@ bool FtpServer::send_file(const std::vector<char> buff_bin)
     uint32_t packet_size = 0;
     int transmit_cnt = 0;
     int size = buff_bin.size();
-    std::vector<char> send_buff;
+    //std::vector<char> send_buff;
 
     while (transmit_cnt != size)
     {
