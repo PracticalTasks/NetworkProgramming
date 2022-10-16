@@ -144,7 +144,7 @@ bool FtpServer::load_file(std::string const& file_path)
     //Заносить в первые четыре байта длину файла в big endian
     insert_sizefile_tobuff(buff_bin, length);
     file_stream.read(buff_bin.data() + 4, FILEBUFF_SZ - 4);
-
+    
     if (!send_file(buff_bin))
         return false;
 
