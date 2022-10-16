@@ -135,6 +135,7 @@ bool FtpServer::load_file(std::string const& file_path)
         return false;
 
     //get length of file:
+
     file_stream.seekg(0, file_stream.end);
     int32_t length = file_stream.tellg();
     file_stream.seekg(0, file_stream.beg);
