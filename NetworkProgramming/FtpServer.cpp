@@ -57,7 +57,7 @@ int FtpServer::waiting_request()
     sockaddr_in addr_c;
     int addrlen = sizeof(addr_c);
 
-    std::array <char, BUFF_SIZE> buff{};
+    std::array <char, BUFF_SIZE> name_file{};
     uint32_t packet_size = 0;
 
     while (true)
@@ -74,34 +74,31 @@ int FtpServer::waiting_request()
             << "Client with address "
             << inet_ntop(AF_INET, &addr_c.sin_addr, client_addrbuf, sizeof(client_addrbuf) / sizeof(client_addrbuf[0]))
             << ":" << ntohs(addr_c.sin_port)
-            << std::endl;
+            <<"\n\n";
 
         while (true)
         {
-            packet_size = recv(*client_sock, buff.data(), buff.size(), 0);
+            packet_size = recv(*client_sock, name_file.data(), name_file.size(), 0);
 
             if (packet_size > 0)
             {
-                if (cmp_chartostr(buff.data(), CMD_EXT, packet_size))
+                if (cmp_chartostr(name_file.data(), EXT_CMD, packet_size))
                 {
                     std::cout << "Echo server has been stopped ...\n";
                     return EXIT_SUCCESS;
                 }
 
-                std::string filename(network_path + buff.data());
-
-                if (!load_file(filename))
-                {
-                    std::cout << "Error load file " << filename;
-                }
+                if (!load_file(network_folder + name_file.data()))
+                    continue;
             }
             else if (packet_size == 0)
             {
-                std::cout << "disconnect\n";
+                std::cout << "disconnect " << inet_ntop(AF_INET, &addr_c.sin_addr, client_addrbuf,
+                    sizeof(client_addrbuf) / sizeof(client_addrbuf[0])) << ":" << ntohs(addr_c.sin_port) << std::endl;
                 break;
             }
                 
-            buff.fill(0);
+            name_file.fill(0);
             std::cout << std::endl;
         }
         delete client_sock;
@@ -110,7 +107,7 @@ int FtpServer::waiting_request()
     return EXIT_SUCCESS;
 }
 
-void FtpServer::insert_sizefile_tobuff(std::vector<char> &buff, int32_t val)
+void FtpServer::insert_sizefile_inbuff(std::vector<char> &buff, int32_t val)
 {
     uint16_t hw_val{}; //старшее слово
     uint16_t lw_val{}; //младшее слово
@@ -127,56 +124,61 @@ void FtpServer::insert_sizefile_tobuff(std::vector<char> &buff, int32_t val)
 
 bool FtpServer::load_file(std::string const& file_path)
 {
-    std::vector<char> buff_bin(FILEBUFF_SZ);
+    std::vector<char> img_buff(IMGBUFF_SZ);
     //Должна быть папка "C:\Netwk" в которой сервер будет искать файл 
     std::ifstream file_stream(file_path, std::ifstream::binary);
     
     if (!file_stream)
+    {
+        std::cout << "Error load file " << file_path;
         return false;
-
+    }
+       
     //get length of file:
-
     file_stream.seekg(0, file_stream.end);
-    int32_t length = file_stream.tellg();
+    //Переменная обратный счётчик для определения конца файла
+    int32_t img_length = file_stream.tellg();
     file_stream.seekg(0, file_stream.beg);
 
     std::cout << "Sending file " << file_path << "...\n";
 
     //Заносить в первые четыре байта длину файла в big endian
-    insert_sizefile_tobuff(buff_bin, length);
-    //file_stream.read(buff_bin.data(), FILEBUFF_SZ);
-    file_stream.read(buff_bin.data() + 4, FILEBUFF_SZ - 4);
-    length -= 0x1000 - 4;
-    if (!send_file(buff_bin))
+    insert_sizefile_inbuff(img_buff, img_length);
+    file_stream.read(img_buff.data() + SERVINFO_SZ, IMGBUFF_SZ - SERVINFO_SZ);
+    //Часть файла уже загрузили
+    img_length -= IMGBUFF_SZ - SERVINFO_SZ;
+    if (!send_file(img_buff))
         return false;
     
     while (file_stream)
     {
-        file_stream.read(buff_bin.data(), FILEBUFF_SZ);
+        file_stream.read(img_buff.data(), IMGBUFF_SZ);
 
-        if (length <= 0x1000)
-            buff_bin.resize(length);
+        //Проверяем ни моследняя ли часть файла
+        if (img_length <= IMGBUFF_SZ)
+            img_buff.resize(img_length);                //Изменяем размер буфера равный оставшимся байтам
 
-        length -= 0x1000;
+        img_length -= IMGBUFF_SZ;
 
-        if (!send_file(buff_bin))
+        if (!send_file(img_buff))
             return false;
-        buff_bin.assign(FILEBUFF_SZ, 0);
+        img_buff.assign(IMGBUFF_SZ, 0);
     }
-   
+    
+    std::cout << "done!\n";
+
     return true;
 }
 
-bool FtpServer::send_file(const std::vector<char> buff_bin)
+bool FtpServer::send_file(const std::vector<char> img_buff)
 {
     uint32_t packet_size = 0;
     int transmit_cnt = 0;
-    int size = buff_bin.size();
-    //std::vector<char> send_buff;
+    int size = img_buff.size();
 
     while (transmit_cnt != size)
     {
-        packet_size = send(*client_sock, &(buff_bin.data()[0]) + transmit_cnt, size  - transmit_cnt, 0);
+        packet_size = send(*client_sock, &(img_buff.data()[0]) + transmit_cnt, size  - transmit_cnt, 0);
 
         if (packet_size == SOCKET_ERROR)
         {
@@ -190,12 +192,12 @@ bool FtpServer::send_file(const std::vector<char> buff_bin)
 }
 
 //Метод для сравнения символьной строки с string
-inline bool FtpServer::cmp_chartostr(const char* buff, const std::string& cmd, const int lenBuff)
+inline bool FtpServer::cmp_chartostr(const char* buff, const std::string& cmd, const int buff_len)
 {
-    if (cmd.size() != lenBuff)
+    if (cmd.size() != buff_len)
         return false;
 
-    for (int i{}; i < lenBuff; ++i)
+    for (int i{}; i < buff_len; ++i)
     {
         if (tolower(buff[i]) != cmd[i])
             return false;
