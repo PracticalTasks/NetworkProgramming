@@ -34,7 +34,7 @@ private:
 	socket_wrapper::SocketWrapper sock_wrap;
 	socket_wrapper::Socket* ftpserv_sock = nullptr;
 	socket_wrapper::Socket* client_sock = nullptr;
-	std::string network_path = "C:\\Netwk\\";
+	std::string network_path = "E:\\Netwk\\";
 	const std::string CMD_EXT = "exit";
 	const uint16_t FILEBUFF_SZ = 4096;
 
