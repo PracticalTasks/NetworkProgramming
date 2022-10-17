@@ -24,18 +24,23 @@ public:
 
 private:
 	bool start_server(const uint16_t READ_PORT);
-	inline bool cmp_chartostr(const char* buff, const std::string& cmd , const int lenBuff);
+	inline bool cmp_chartostr(const char* buff, const std::string& cmd, const int buff_len);
 	int waiting_request();
 	bool load_file(std::string const& file_path);
-	bool send_file(const std::vector<char> buff_bin);
-	void insert_sizefile_tobuff(std::vector<char> &buff, int32_t val);
+	bool send_file(const std::vector<char> img_buff);
+	void insert_sizefile_inbuff(std::vector<char>& buff, int32_t val);
 
 private:
+	//constants
+	const uint8_t SERVINFO_SZ = 4;
+	const std::string EXT_CMD = "exit";
+	const uint16_t IMGBUFF_SZ = 4096;
+
 	socket_wrapper::SocketWrapper sock_wrap;
 	socket_wrapper::Socket* ftpserv_sock = nullptr;
 	socket_wrapper::Socket* client_sock = nullptr;
-	std::string network_path = "C:\\Netwk\\";
-	const std::string CMD_EXT = "exit";
-	const uint16_t FILEBUFF_SZ = 4096;
+	//Папка в которой будет искать файлы сервер
+	std::string network_folder = "E:\\Netwk\\";
+
 
 };
