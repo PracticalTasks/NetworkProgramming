@@ -40,7 +40,7 @@ private:
 	socket_wrapper::Socket* ftpserv_sock = nullptr;
 	socket_wrapper::Socket* client_sock = nullptr;
 	//Папка в которой будет искать файлы сервер
-	std::string network_folder = "E:\\Netwk\\";
+	std::string network_folder = "C:\\Netwk\\";
 
 
 };
