@@ -10,9 +10,14 @@
 #include <fstream>
 #include <filesystem>
 
-#include <socket_wrapper/socket_headers.h>
-#include <socket_wrapper/socket_wrapper.h>
-#include <socket_wrapper/socket_class.h>
+#include <boost/system/error_code.hpp>
+#include <boost/asio.hpp>
+
+//#include <socket_wrapper/socket_headers.h>
+//#include <socket_wrapper/socket_wrapper.h>
+//#include <socket_wrapper/socket_class.h>
+
+using namespace boost::asio;
 
 #define BUFF_SIZE 256
 
@@ -31,9 +36,11 @@ private:
 	void insert_sizefile_tobuff(std::vector<char> &buff, int32_t val);
 
 private:
-	socket_wrapper::SocketWrapper sock_wrap;
-	socket_wrapper::Socket* ftpserv_sock = nullptr;
-	socket_wrapper::Socket* client_sock = nullptr;
+	io_service serv;
+
+	//socket_wrapper::SocketWrapper sock_wrap;
+	//socket_wrapper::Socket* ftpserv_sock = nullptr;
+	//socket_wrapper::Socket* client_sock = nullptr;
 	std::string network_path = "C:\\Netwk\\";
 	const std::string CMD_EXT = "exit";
 	const uint16_t FILEBUFF_SZ = 4096;

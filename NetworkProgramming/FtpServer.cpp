@@ -53,6 +53,11 @@ bool FtpServer::start_server(const uint16_t READ_PORT)
 
 int FtpServer::waiting_request()
 {
+    ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 5555);
+    ip::tcp::socket sock(serv);
+
+    sock.connect(ep);
+
     char client_addrbuf[INET_ADDRSTRLEN];
 
     sockaddr_in addr_c;
