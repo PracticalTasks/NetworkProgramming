@@ -18,6 +18,7 @@
 //#include <socket_wrapper/socket_class.h>
 
 using namespace boost::asio;
+typedef boost::shared_ptr<ip::tcp::socket> socket_ptr;
 
 #define BUFF_SIZE 256
 
@@ -34,9 +35,14 @@ private:
 	bool load_file(std::string const& file_path);
 	bool send_file(const std::vector<char> buff_bin);
 	void insert_sizefile_tobuff(std::vector<char> &buff, int32_t val);
+	void handle_accept(socket_ptr sock, const boost::system::error_code& err);
+	void start_accept(socket_ptr sock);
 
 private:
-	io_service serv;
+	io_service service;
+	socket_ptr sock;
+	ip::tcp::endpoint* ep = nullptr;
+	ip::tcp::acceptor* acc = nullptr;
 
 	//socket_wrapper::SocketWrapper sock_wrap;
 	//socket_wrapper::Socket* ftpserv_sock = nullptr;

@@ -1,6 +1,7 @@
 #include "FtpServer.h"
 
 FtpServer::FtpServer(const uint16_t READ_PORT)
+    : sock(new ip::tcp::socket(service))
 {
     if (!start_server(READ_PORT))
     {
@@ -13,50 +14,54 @@ FtpServer::FtpServer(const uint16_t READ_PORT)
 
 FtpServer::~FtpServer()
 {
-    delete ftpserv_sock;
+    delete ep;
+    //delete sock_ptr;
 }
 
 bool FtpServer::start_server(const uint16_t READ_PORT)
-{
-    ftpserv_sock = new socket_wrapper::Socket(AF_INET, SOCK_STREAM, NULL);
+{   
+    
 
-    if (!*ftpserv_sock)
-    {
-        std::cerr << sock_wrap.get_last_error_string() << std::endl;
-        return false;
-    }
+    ep = new ip::tcp::endpoint(ip::tcp::v4(), 5555); // listen on 5555
 
-    sockaddr_in addr =
-    {
-        .sin_family = AF_INET,
-        .sin_port = htons(READ_PORT),
-    };
+    sock->connect(*ep);
+
+    //ftpserv_sock = new socket_wrapper::Socket(AF_INET, SOCK_STREAM, NULL);
 
 
-    addr.sin_addr.s_addr = INADDR_ANY;
+    //if (!*ftpserv_sock)
+    //{
+    //    std::cerr << sock_wrap.get_last_error_string() << std::endl;
+    //    return false;
+    //}
 
-    if (bind(*ftpserv_sock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0)
-    {
-        std::cerr << sock_wrap.get_last_error_string() << std::endl;
-        // Socket will be closed in the Socket destructor.
-        return false;
-    }
+    //sockaddr_in addr =
+    //{
+    //    .sin_family = AF_INET,
+    //    .sin_port = htons(READ_PORT),
+    //};
 
-    if (listen(*ftpserv_sock, SOMAXCONN) != SOCKET_ERROR)
-    {
-        std::cout << "Running ftp server on the port " << READ_PORT << "...\n";
-        return true;
-    }
+
+    //addr.sin_addr.s_addr = INADDR_ANY;
+
+    ////if (bind(*ftpserv_sock, reinterpret_cast<const sockaddr*>(&addr), sizeof(addr)) != 0)
+    ////{
+    ////    std::cerr << sock_wrap.get_last_error_string() << std::endl;
+    ////    // Socket will be closed in the Socket destructor.
+    ////    return false;
+    ////}
+
+    //if (listen(*ftpserv_sock, SOMAXCONN) != SOCKET_ERROR)
+    //{
+    //    std::cout << "Running ftp server on the port " << READ_PORT << "...\n";
+    //    return true;
+    //}
         
     return false;
 }
 
 int FtpServer::waiting_request()
 {
-    ip::tcp::endpoint ep(ip::address::from_string("127.0.0.1"), 5555);
-    ip::tcp::socket sock(serv);
-
-    sock.connect(ep);
 
     char client_addrbuf[INET_ADDRSTRLEN];
 
@@ -66,15 +71,19 @@ int FtpServer::waiting_request()
     std::array <char, BUFF_SIZE> buff{};
     uint32_t packet_size = 0;
 
+    acc = new ip::tcp::acceptor(service, *ep);
+
     while (true)
     {
-        client_sock = new socket_wrapper::Socket(accept(*ftpserv_sock, reinterpret_cast<sockaddr*>(&addr_c), &addrlen));
+        //client_sock = new socket_wrapper::Socket(accept(*ftpserv_sock, reinterpret_cast<sockaddr*>(&addr_c), &addrlen));
 
-        if (!client_sock)
-        {
-            std::cerr << sock_wrap.get_last_error_string() << std::endl;
-            return EXIT_FAILURE;
-        }
+        //if (!client_sock)
+        //{
+        //    std::cerr << sock_wrap.get_last_error_string() << std::endl;
+        //    return EXIT_FAILURE;
+        //}
+
+        acc.async_accept(*sock,boost::bind())
 
         std::cout
             << "Client with address "
@@ -129,6 +138,14 @@ void FtpServer::insert_sizefile_tobuff(std::vector<char> &buff, int32_t val)
     it[1] = lw_val >> 8;
     it[2] = hw_val & 0xFF;
     it[3] = hw_val >> 8;
+}
+
+void FtpServer::handle_accept(socket_ptr sock, const boost::system::error_code& err)
+{
+    if (err) return;
+    // at this point, you can read/write to the socket
+    socket_ptr sock(new ip::tcp::socket(service));
+    start_accept(sock);
 }
 
 bool FtpServer::load_file(std::string const& file_path)
