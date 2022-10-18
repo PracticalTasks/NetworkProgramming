@@ -122,10 +122,71 @@ void FtpServer::insert_sizefile_inbuff(std::vector<char>& buff, int32_t val)
     it[3] = hw_val >> 8;
 }
 
-bool FtpServer::load_file(std::string const& file_path)
+void FtpServer::strcmd_parsing(std::string str_cmd)
 {
-    std::vector<char> img_buff(IMGBUFF_SZ);
-    //Должна быть папка "C:\Netwk" в которой сервер будет искать файл 
+    int item_pos{};
+    int prev_pos{};
+
+    //Получаем имя файла из принятой команды
+    if ((item_pos = str_cmd.find(' ')) == -1)
+    {
+        std::cout << "No arguments";
+        file_path = str_cmd;
+        return;
+    }
+    
+    file_path = str_cmd.substr(0, item_pos);
+    prev_pos = item_pos + 1;
+    
+    //Первый аргумент
+    std::string str_arg1;
+    if ((item_pos = str_cmd.find(' ', prev_pos)) == -1)
+    {
+        str_arg1 = str_cmd.substr(prev_pos + 1);
+        try
+        {
+            arg_1 = stoi(str_arg1);
+        }
+        catch (std::invalid_argument e)
+        {
+            std::cout << "Caught Invalid Argument_1 Exception\n";
+        }
+        return;
+    } 
+    
+    str_arg1 = str_cmd.substr(prev_pos + 1, item_pos - (prev_pos + 1));      //Прибовляем к позиции разделитель что бы его не записывать
+    try
+    {
+        arg_1 = stoi(str_arg1);
+    }
+    catch (std::invalid_argument e)
+    {
+        std::cout << "Caught Invalid Argument_1 Exception\n";
+    }
+
+    prev_pos = item_pos + 1;
+
+    //Второй аргумент
+    std::string str_arg2;
+    str_arg2 = str_cmd.substr(prev_pos + 1);      //Прибовляем к позиции разделитель что бы его не записывать
+
+    try
+    {
+        arg_2 = stoi(str_arg2);
+    }
+    catch(std::invalid_argument e)
+    {
+        std::cout << "Caught Invalid Argument_2 Exception\n";
+    }  
+}
+
+bool FtpServer::load_file(std::string const& str_cmd)
+{
+    std::vector<char> file_buff(FILEBUFF_SZ);
+
+    //Парсим команду пришедшую от клиента
+    strcmd_parsing(str_cmd);
+
     std::ifstream file_stream(file_path, std::ifstream::binary);
 
     if (!file_stream)
@@ -134,35 +195,65 @@ bool FtpServer::load_file(std::string const& file_path)
         return false;
     }
 
-    //get length of file:
-    file_stream.seekg(0, file_stream.end);
-    //Переменная обратный счётчик для определения конца файла
-    int32_t img_length = file_stream.tellg();
-    file_stream.seekg(0, file_stream.beg);
+    int32_t file_length{};
+    //Количество считываемых байт
+    int reading_file_sz{};
+    //Если есть второй аргумент указывающий сколько байт передовать
+    if (arg_2)
+        file_length = arg_2;
+    else
+    {
+        //get length of file:
+        file_stream.seekg(0, file_stream.end);
+        //Переменная обратный счётчик для определения конца файла
+        file_length = file_stream.tellg();
+        //Отнимаем от общего размера смещения с которого читается файл
+        file_length -= arg_1;
+        file_stream.seekg(arg_1, file_stream.beg);
+    }
+
+    //Если размер файла меньше буфера за минусом служебной информации
+    if (file_length < (FILEBUFF_SZ - SERVINFO_SZ))
+        reading_file_sz = file_length;
+    else
+        reading_file_sz = FILEBUFF_SZ - SERVINFO_SZ;
 
     std::cout << "Sending file " << file_path << "...\n";
 
     //Заносить в первые четыре байта длину файла в big endian
-    insert_sizefile_inbuff(img_buff, img_length);
-    file_stream.read(img_buff.data() + SERVINFO_SZ, IMGBUFF_SZ - SERVINFO_SZ);
+    insert_sizefile_inbuff(file_buff, file_length);
+    //Если есть первый аргумент 'смещения от начала файла'
+    //Устанавливаем текущую позицию чтения из file_stream на него
+    //if (arg_1)
+    //    file_stream.seekg(arg_1, file_stream.cur);
+
+    file_stream.read(file_buff.data() + SERVINFO_SZ, reading_file_sz);
+
+    //Проверяем ни моследняя ли часть файла
+    if (file_length <= FILEBUFF_SZ)
+        file_buff.resize(file_length + SERVINFO_SZ);                //Изменяем размер буфера равный оставшимся байтам
+
     //Часть файла уже загрузили
-    img_length -= IMGBUFF_SZ - SERVINFO_SZ;
-    if (!send_file(img_buff))
+    file_length -= FILEBUFF_SZ - SERVINFO_SZ;
+    if (!send_file(file_buff))
         return false;
 
-    while (file_stream)
+    //Снова делаем размер считываемых данных равный буферу
+    reading_file_sz += SERVINFO_SZ;
+
+    while (file_length > 0)
     {
-        file_stream.read(img_buff.data(), IMGBUFF_SZ);
+        file_stream.read(file_buff.data(), reading_file_sz);
 
         //Проверяем ни моследняя ли часть файла
-        if (img_length <= IMGBUFF_SZ)
-            img_buff.resize(img_length);                //Изменяем размер буфера равный оставшимся байтам
+        if (file_length <= FILEBUFF_SZ)
+            file_buff.resize(file_length);                //Изменяем размер буфера равный оставшимся байтам
 
-        img_length -= IMGBUFF_SZ;
+        file_length -= FILEBUFF_SZ;
 
-        if (!send_file(img_buff))
+        if (!send_file(file_buff))
             return false;
-        img_buff.assign(IMGBUFF_SZ, 0);
+        file_buff.assign(FILEBUFF_SZ, 0);
     }
 
     std::cout << "done!\n";
@@ -170,15 +261,15 @@ bool FtpServer::load_file(std::string const& file_path)
     return true;
 }
 
-bool FtpServer::send_file(const std::vector<char> img_buff)
+bool FtpServer::send_file(const std::vector<char> file_buff)
 {
     uint32_t packet_size = 0;
     int transmit_cnt = 0;
-    int size = img_buff.size();
+    int size = file_buff.size();
 
     while (transmit_cnt != size)
     {
-        packet_size = send(*client_sock, &(img_buff.data()[0]) + transmit_cnt, size - transmit_cnt, 0);
+        packet_size = send(*client_sock, &(file_buff.data()[0]) + transmit_cnt, size - transmit_cnt, 0);
 
         if (packet_size == SOCKET_ERROR)
         {
