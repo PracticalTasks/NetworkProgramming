@@ -10,19 +10,22 @@
 #include <fstream>
 #include <filesystem>
 
-#include <boost/system/error_code.hpp>
-#include <boost/asio.hpp>
 
-//#include <socket_wrapper/socket_headers.h>
-//#include <socket_wrapper/socket_wrapper.h>
-//#include <socket_wrapper/socket_class.h>
+#include <boost/bind.hpp>
+#include <boost/asio.hpp>
+#include <boost/shared_ptr.hpp>
+#include <boost/enable_shared_from_this.hpp>
+#include <boost/system/error_code.hpp>
 
 using namespace boost::asio;
+using namespace boost::posix_time;
+using boost::system::error_code;
+
 typedef boost::shared_ptr<ip::tcp::socket> socket_ptr;
 
-#define BUFF_SIZE 256
+//#define BUFF_SIZE 256
 
-class FtpServer
+class FtpServer : public std::enable_shared_from_this<FtpServer>
 {
 public:
 	FtpServer(const uint16_t READ_PORT);
@@ -33,14 +36,15 @@ private:
 	inline bool cmp_chartostr(const char* buff, const std::string& cmd , const int lenBuff);
 	int waiting_request();
 	bool load_file(std::string const& file_path);
-	bool send_file(const std::vector<char> buff_bin);
+	//bool send_file(const std::vector<char> buff_bin);
 	void insert_sizefile_tobuff(std::vector<char> &buff, int32_t val);
-	void handle_accept(socket_ptr sock, const boost::system::error_code& err);
-	void start_accept(socket_ptr sock);
+	//void handle_accept(socket_ptr sock, const boost::system::error_code& err);
+	//void start_accept(socket_ptr sock);
+	//size_t read_complete(char* buff, const error_code& err, size_t bytes);
 
 private:
 	io_service service;
-	socket_ptr sock;
+	ip::tcp::socket* sock = nullptr;
 	ip::tcp::endpoint* ep = nullptr;
 	ip::tcp::acceptor* acc = nullptr;
 
