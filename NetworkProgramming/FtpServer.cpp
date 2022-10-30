@@ -28,29 +28,7 @@ bool FtpServer::start_server(const uint16_t READ_PORT)
     serv_accept->async_accept(*sock, boost::bind(&FtpServer::accepted_connection,
         this, boost::asio::placeholders::error));
 
-    //serv_accept->async_accept(*sock, [this](const boost::system::error_code& ec)
-    //    {
-    //        if (ec)
-    //            std::cout << "Error async_accept\n";
-    //        std::cout
-    //            << "Client with address "
-    //            << sock->remote_endpoint().address().to_string()
-    //            << ":" << ntohs(sock->remote_endpoint().port())
-    //            << std::endl;
-
-    //        sock->async_read_some(buffer(req_buff, 256), boost::bind(&FtpServer::waiting_request, 
-    //            this, boost::asio::placeholders::error, boost::asio::placeholders::bytes_transferred));
-
-    //        //sock->async_read_some(buffer(req_buff, 256), [this](const boost::system::error_code& ec, std::size_t bytes_transferred)
-    //        //    {
-    //        //        if (!ec)
-    //        //            waiting_request(ec, bytes_transferred);
-    //        //    });
-
-    //    });
-
     std::cout << "Running ftp server on the port " << READ_PORT << "..." << std::endl;
-
 
     return true;
 }
@@ -91,14 +69,7 @@ void FtpServer::waiting_request(const boost::system::error_code& ec, std::size_t
         }
     }
     else if (bytes_transferred == 0)
-    {
         std::cout << "Disconnected\n";
-        //serv_accept->listen();
-
-        serv_accept->async_accept(*sock, boost::bind(&FtpServer::accepted_connection,
-            this, boost::asio::placeholders::error));
-        //service.run();
-    }
         
 }
 
