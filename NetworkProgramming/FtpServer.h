@@ -30,12 +30,9 @@ private:
 	void waiting_request(const boost::system::error_code& ec, std::size_t bytes_transferred);
 	void accepted_connection(const boost::system::error_code& ec);
 
-	//void waiting_request(const boost::system::error_code& ec, std::size_t bytes_transferred);
 	bool load_file(std::string const& file_path);
 	bool send_file(const std::vector<char> buff_bin);
 	void insert_sizefile_tobuff(std::vector<char> &buff, int32_t val);
-	//void handle_accept(socket_ptr sock, const boost::system::error_code& err);
-	//void start_accept(socket_ptr sock);
 
 private:
 	io_service service;
