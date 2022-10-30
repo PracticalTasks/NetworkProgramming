@@ -222,11 +222,6 @@ bool FtpServer::load_file(std::string const& str_cmd)
 
     //Заносить в первые четыре байта длину файла в big endian
     insert_sizefile_inbuff(file_buff, file_length);
-    //Если есть первый аргумент 'смещения от начала файла'
-    //Устанавливаем текущую позицию чтения из file_stream на него
-    //if (arg_1)
-    //    file_stream.seekg(arg_1, file_stream.cur);
-
     file_stream.read(file_buff.data() + SERVINFO_SZ, reading_file_sz);
 
     //Проверяем ни моследняя ли часть файла
